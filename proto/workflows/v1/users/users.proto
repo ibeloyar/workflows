@@ -1,20 +1,66 @@
-// Версия ProtoBuf
 syntax = "proto3";
 
-// Текущий пакет - указывает пространство имен для сервиса и сообщений. Помогает избегать конфликтов имен.
 package users.v1;
 
-// Настройки для генерации Go кода.
-option go_package = "github.com/ibeloyar/workflows/propo/workflows/v1/users;users";
+option go_package = "github.com/ibeloyar/workflows/propo/workflows/v1/users;usersv1";
+
+import "google/api/resource.proto";
+import "google/protobuf/empty.proto";
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
 
 service Users {
-    rpc SayHelloFFF (UsersRequest) returns (UsersReply) {}
+    rpc GetUser(GetUserInfoRequest) returns (User) {
+        option (google.api.http) = {
+            get: "/v1/users/{user_id}"
+        };
+    }
+
+    rpc CreateUser(CreateUserRequest) returns (User) {
+        option (google.api.http) = {
+            post: "/v1/users"
+            body: "data"
+        };
+    }
+
+    rpc DeleteUser(DeleteUserRequest) returns (google.protobuf.Empty) {
+        option (google.api.http) = {
+          delete: "/v1/users/{user_id}"
+        };
+    }
 }
 
-message UsersRequest {
-    string name = 1;
+message User {
+    uint32 id = 1;
+    string login = 2;
+    string email = 3;
+    bool email_is_confirm = 4;
+    uint32 projects_limit = 5;
+    uint32 projects_active = 6;
 }
 
-message UsersReply {
-    string message = 1;
+message RegistrationData {
+    string login = 1 [(google.api.field_behavior) = REQUIRED];
+    string email = 2 [(google.api.field_behavior) = REQUIRED];
+    string password = 3 [(google.api.field_behavior) = REQUIRED];
+}
+
+message GetUserInfoRequest {
+    uint32 user_id = 1 [
+        (google.api.field_behavior) = REQUIRED,
+        (google.api.resource_reference) = {
+            type: "workflows/v1/users.proto/User"
+        }];
+}
+
+message CreateUserRequest {
+    RegistrationData data = 1 [(google.api.field_behavior) = REQUIRED]; 
+}
+
+message DeleteUserRequest {
+    uint32 user_id = 1 [
+        (google.api.field_behavior) = REQUIRED,
+        (google.api.resource_reference) = {
+            type: "workflows/v1/users.proto/User"
+        }];
 }

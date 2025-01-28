@@ -144,12 +144,13 @@ clean-tools-cache:
 .PHONY: help
 help:
 	@echo "command           | description"
-	@echo "=============================================="
+	@echo "===================================================="
 	@echo "help              | info for project make commands"
 	@echo "run               | run project"
 	@echo "build             | build project"
+	@echo "lint              | run go lint tool"
+	@echo "proto             | generate code from *.proto files"
 	@echo "install-lint      | install go lint tool"
 	@echo "install-protoc    | install porto compiler"
-	@echo "lint              | run go lint tool"
 	@echo "install-tools     | install all tools"
 	@echo "clean-tools-cache | clean tools cache folder"
