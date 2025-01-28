@@ -11,6 +11,8 @@ TOOLS_CACHE_DIR = tools/cache
 TOOLS_GO_LINT_VERSION = 1.63.4
 TOOLS_PROTOC_VERSION = 24.3
 
+PROTO_DIR_V1=proto/$(PROJECT_NAME)/v1
+
 # INIT VARS DEPENDING ON THE OS
 ifeq ($(OPERATING_SYSTEM),Linux)
 	GO_LINT_DIST_NAME = golangci-lint-$(TOOLS_GO_LINT_VERSION)-linux-amd64.tar.gz
@@ -60,7 +62,6 @@ $(PROTOC_DIST): | $(PROTOC_DIST_ARCHIVE)
 	unzip -d "$@" -o $|
 
 PROTOC_TOOL = $(TOOLS_BIN_DIR)/protoc
-GRPC_TOOLS = $(PROTOC_TOOL)
 
 $(PROTOC_TOOL): | $(PROTOC_DIST)
 	cp -f $(PROTOC_DIST)/bin/protoc $@
@@ -74,16 +75,26 @@ define install-go-tool =
 endef
 
 PROTOC_GEN_GO_TOOL = $(TOOLS_BIN_DIR)/protoc-gen-go
+GRPC_TOOLS = $(PROTOC_GEN_GO_TOOL)
 $(PROTOC_GEN_GO_TOOL):
 	$(install-go-tool) google.golang.org/protobuf/cmd/protoc-gen-go
 
 PROTOC_GEN_GO_GRPC_TOOL = $(TOOLS_BIN_DIR)/protoc-gen-go-grpc
+GRPC_TOOLS += $(PROTOC_GEN_GO_GRPC_TOOL)
 $(PROTOC_GEN_GO_GRPC_TOOL):
 	$(install-go-tool) google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
+PROTOC_GEN_GO_GRPC_GATEWAY = $(TOOLS_BIN_DIR)/protoc-gen-grpc-gateway
+GRPC_TOOLS += $(PROTOC_GEN_GO_GRPC_GATEWAY)
+$(PROTOC_GEN_GO_GRPC_GATEWAY):
+	$(install-go-tool) github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 
-PROTO_DIR_V1=proto/$(PROJECT_NAME)/v1
+PROTOC_GEN_GO_OPENAPIV2_TOOL = $(TOOLS_BIN_DIR)/protoc-gen-openapiv2
+GRPC_TOOLS += $(PROTOC_GEN_GO_OPENAPIV2_TOOL)
+$(PROTOC_GEN_GO_OPENAPIV2_TOOL):
+	$(install-go-tool) github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2
 
+## COMMANDS
 .PHONY: proto
 proto:
 	@$(PROTOC_TOOL) -I$(PROTO_DIR_V1) \
@@ -93,11 +104,12 @@ proto:
 		--plugin=protoc-gen-go-grpc=$(PROTOC_GEN_GO_GRPC_TOOL) \
 		--go-grpc_out=$(PROTO_DIR_V1) \
 		--go-grpc_opt=paths=source_relative \
+		--plugin=protoc-gen-grpc-gateway=$(PROTOC_GEN_GO_GRPC_GATEWAY) \
+		--grpc-gateway_out=$(PROTO_DIR_V1) \
+		--grpc-gateway_opt=paths=source_relative \
+		--plugin=protoc-gen-openapiv2=$(PROTOC_GEN_GO_OPENAPIV2_TOOL) \
 		./$(PROTO_DIR_V1)/**/*.proto
 
-
-
-## COMMANDS
 .PHOHY: create-cache-dir
 create-cache-dir:
 	$(shell mkdir -p $(TOOLS_CACHE_DIR))
@@ -110,7 +122,7 @@ install-protoc: create-cache-dir | $(PROTOC_TOOL)
 
 .PHOHY: install-tools
 # install-tools: install-lint install-protoc clean-tools-cache
-install-tools: $(PROTOC_GEN_GO_TOOL) $(PROTOC_GEN_GO_GRPC_TOOL)
+install-tools: $(GRPC_TOOLS)
 
 .PHOHY: lint
 lint:
