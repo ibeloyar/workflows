@@ -12,6 +12,8 @@ tools/cache
 *.dll
 *.so
 *.dylib
+*.sqlite
+*.sql
 
 # Test binary, built with `go test -c`
 *.test

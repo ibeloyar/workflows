@@ -1,0 +1,20 @@
+// Версия ProtoBuf
+syntax = "proto3";
+
+// Текущий пакет - указывает пространство имен для сервиса и сообщений. Помогает избегать конфликтов имен.
+package greeter;
+
+// Настройки для генерации Go кода.
+option go_package = "github.com/ibeloyar/workflows/propo/workflows/v1/users;users";
+
+service Users {
+    rpc SayHelloFFF (UsersRequest) returns (UsersReply) {}
+}
+
+message UsersRequest {
+    string name = 1;
+}
+
+message UsersReply {
+    string message = 1;
+}
