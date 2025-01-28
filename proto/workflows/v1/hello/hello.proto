@@ -2,14 +2,19 @@
 syntax = "proto3";
 
 // Текущий пакет - указывает пространство имен для сервиса и сообщений. Помогает избегать конфликтов имен.
-package hello;
+package hello.v1;
+
+import "google/api/annotations.proto";
 
 // Настройки для генерации Go кода.
 option go_package = "github.com/ibeloyar/workflows/propo/workflows/v1/hello;hello";
 
 service Greeter {
-    rpc SayHello (HelloRequest) returns (HelloReply) {}
-    rpc SayHelloAgain (HelloRequest) returns (HelloReply) {}
+    rpc SayHello (HelloRequest) returns (HelloReply) {
+        option (google.api.http) = {
+            get: "/v1/hello"
+        };
+    }
 }
 
 message HelloRequest {

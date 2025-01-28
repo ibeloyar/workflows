@@ -2,7 +2,7 @@
 syntax = "proto3";
 
 // Текущий пакет - указывает пространство имен для сервиса и сообщений. Помогает избегать конфликтов имен.
-package greeter;
+package users.v1;
 
 // Настройки для генерации Go кода.
 option go_package = "github.com/ibeloyar/workflows/propo/workflows/v1/users;users";

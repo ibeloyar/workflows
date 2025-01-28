@@ -11,7 +11,8 @@ TOOLS_CACHE_DIR = tools/cache
 TOOLS_GO_LINT_VERSION = 1.63.4
 TOOLS_PROTOC_VERSION = 24.3
 
-PROTO_DIR_V1=proto/$(PROJECT_NAME)/v1
+PROTO_DIR=proto
+PROTO_FILES_V1=proto/$(PROJECT_NAME)/v1
 
 # INIT VARS DEPENDING ON THE OS
 ifeq ($(OPERATING_SYSTEM),Linux)
@@ -97,18 +98,18 @@ $(PROTOC_GEN_GO_OPENAPIV2_TOOL):
 ## COMMANDS
 .PHONY: proto
 proto:
-	@$(PROTOC_TOOL) -I$(PROTO_DIR_V1) \
+	@$(PROTOC_TOOL) -I $(PROTO_DIR) \
 		--plugin=protoc-gen-go=$(PROTOC_GEN_GO_TOOL) \
-		--go_out=$(PROTO_DIR_V1) \
+		--go_out=$(PROTO_DIR) \
 		--go_opt=paths=source_relative \
 		--plugin=protoc-gen-go-grpc=$(PROTOC_GEN_GO_GRPC_TOOL) \
-		--go-grpc_out=$(PROTO_DIR_V1) \
+		--go-grpc_out=$(PROTO_DIR) \
 		--go-grpc_opt=paths=source_relative \
 		--plugin=protoc-gen-grpc-gateway=$(PROTOC_GEN_GO_GRPC_GATEWAY) \
-		--grpc-gateway_out=$(PROTO_DIR_V1) \
+		--grpc-gateway_out=$(PROTO_DIR) \
 		--grpc-gateway_opt=paths=source_relative \
 		--plugin=protoc-gen-openapiv2=$(PROTOC_GEN_GO_OPENAPIV2_TOOL) \
-		./$(PROTO_DIR_V1)/**/*.proto
+		$(PROTO_FILES_V1)/**/*.proto
 
 .PHOHY: create-cache-dir
 create-cache-dir:
@@ -121,8 +122,7 @@ install-lint: create-cache-dir | $(GO_LINT_TOOL)
 install-protoc: create-cache-dir | $(PROTOC_TOOL)
 
 .PHOHY: install-tools
-# install-tools: install-lint install-protoc clean-tools-cache
-install-tools: $(GRPC_TOOLS)
+install-tools: create-cache-dir | $(GO_LINT_TOOL) $(PROTOC_TOOL) $(GRPC_TOOLS) clean-tools-cache
 
 .PHOHY: lint
 lint:
@@ -147,7 +147,7 @@ help:
 	@echo "=============================================="
 	@echo "help              | info for project make commands"
 	@echo "run               | run project"
-	@echo "build               | build project"
+	@echo "build             | build project"
 	@echo "install-lint      | install go lint tool"
 	@echo "install-protoc    | install porto compiler"
 	@echo "lint              | run go lint tool"
